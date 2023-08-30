@@ -1,0 +1,36 @@
+:root{
+  --fg: hsl(0, 0%, 90%);
+  --bg: hsl(0, 0%, 10%);
+  --acc: hsl(314, 100%, 67%);
+}
+
+body{
+  background-color: var(--bg);
+  color: var(--fg);
+}
+h2, a{
+  color: var(--acc);
+}
+a{
+  text-decoration: none;
+}
+div{
+  border-radius: 1em;
+}
+
+.flex-right, .flex-down{
+  display: flex;
+  gap: 0.5em;
+}
+.flex-right{
+  flex-direction: row;
+}
+.flex-down{
+  flex-direction: column;
+}
+.v-center{
+  align-items: center;
+}
+.h-center{
+  justify-content: center;
+}
