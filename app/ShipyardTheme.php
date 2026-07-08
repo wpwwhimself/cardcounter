@@ -27,9 +27,9 @@ class ShipyardTheme
      * If value is an array, 2 different colors may be used for light/dark mode
      */
     public const COLORS = [
-        "primary" => "#0099ff",
-        "secondary" => "#ff9900",
-        "tertiary" => "#8844ff",
+        "primary" => "#9e42f5",
+        "secondary" => "#cd99ff",
+        "tertiary" => "#866eff",
     ];
     #endregion
 
