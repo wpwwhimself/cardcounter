@@ -12,7 +12,7 @@
             inner-class="flex right center middle nowrap"
         >
             @for ($i = 1; $i <= 4; $i++)
-            <div class="card-tray" data-index="{{ $i }}" ondrop="dropCardToHolder(event);" ondragover="event.preventDefault();"></div>
+            <div class="card-tray compact" data-index="{{ $i }}" ondrop="dropCardToHolder(event);" ondragover="event.preventDefault();"></div>
             @endfor
         </x-shipyard.app.card>
 
@@ -20,7 +20,7 @@
             inner-class="flex right center middle nowrap"
         >
             @for ($i = 1; $i <= 4; $i++)
-            <div class="card-tray" data-index="{{ $i }}" ondrop="dropCardToFinalHolder(event);" ondragover="event.preventDefault();"></div>
+            <div class="card-tray compact" data-index="{{ $i }}" ondrop="dropCardToFinalHolder(event);" ondragover="event.preventDefault();"></div>
             @endfor
         </x-shipyard.app.card>
     </div>
@@ -73,7 +73,7 @@ function tooManyCardsInStack(cards) {
         .filter(tray => tray.children.length == 0)
         .length;
 
-    return cards_to_move > free_holders;
+    return cards_to_move > free_holders + 1;
 }
 //? 🦺 validators 🦺 ?//
 
@@ -90,8 +90,8 @@ function moveCardToTable(card, tray) {
     const original_tray = card.closest(".card-tray");
 
     tray.appendChild(card);
-    spreadStack(tray);
-    spreadStack(original_tray);
+    cleanUpStack(tray);
+    cleanUpStack(original_tray);
 }
 
 function moveCardStackToTable(card, tray) {
@@ -140,8 +140,29 @@ function moveCardToHolder(card, holder) {
     }
 
     holder.appendChild(card);
-    spreadStack(holder);
-    spreadStack(original_tray);
+    cleanUpStack(holder);
+    cleanUpStack(original_tray);
+}
+
+function dropCardToFinalHolder(ev) {
+    ev.preventDefault();
+    const card = document.querySelector(`#playmat .playing-card[data-value="${ev.dataTransfer.getData("card")}"]`);
+    const tray = ev.target.closest(".card-tray");
+
+    moveCardToFinalHolder(card, tray);
+}
+
+function moveCardToFinalHolder(card, holder) {
+    const original_tray = card.closest(".card-tray");
+
+    if (!cardsCanBeStackedOnFinalHolder(card, getTopCardFromStack(holder))) {
+        popToast("error", "Ta karta tu nie pasuje.");
+        return;
+    }
+
+    holder.appendChild(card);
+    cleanUpStack(holder);
+    cleanUpStack(original_tray);
 }
 //? ⚓ holders ⚓ ?//
 </script>

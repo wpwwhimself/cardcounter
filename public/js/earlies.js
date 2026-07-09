@@ -29,11 +29,13 @@ function grabCard(ev) {
 // #endregion
 
 // #region visual cleanup
-function spreadStack(stack) {
+function cleanUpStack(stack) {
     if (!stack) return;
 
     Array.from(stack.children).forEach((card, i) => {
-        card.style.transform = `translateY(${i * 35}px)`
+        card.style.transform = (stack.classList.contains("compact"))
+            ? null
+            : `translateY(${i * 35}px)`;
     });
 }
 // #endregion
