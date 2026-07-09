@@ -11,5 +11,5 @@ $decks = [
 @endphp
 
 @foreach ($decks[$mode]->shuffle() as $card)
-<x-card :id="$card" />
+<x-card :id="$card" :mono="in_array($mode, ['standard'])" />
 @endforeach

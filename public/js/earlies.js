@@ -12,7 +12,7 @@ function getTopCardFromStack(stack) {
 function getCardValue(card, mode = "standard") {
     if (!card) return null;
     const data = card.dataset.value.split("-");
-    
+
     return {
         color: data[0].charCodeAt(0) - 64,
         rank: parseInt(data[1])
@@ -33,7 +33,7 @@ function spreadStack(stack) {
     if (!stack) return;
 
     Array.from(stack.children).forEach((card, i) => {
-        card.style.transform = `translateY(${i * 22}px)`
+        card.style.transform = `translateY(${i * 35}px)`
     });
 }
 // #endregion

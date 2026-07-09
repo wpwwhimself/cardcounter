@@ -2,13 +2,18 @@
 .playing-card,
 .card-tray {
     border: 1px solid var(--bg-lite);
-    border-radius: 1em;
 
     display: inline-block;
     position: relative;
-    
+
     width: 106.34px;
     height: 150px;
+}
+
+.playing-card,
+.card-tray,
+.playing-card > img {
+    border-radius: 1em;
 }
 
 /* ****************** */
