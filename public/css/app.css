@@ -1,11 +1,21 @@
-.playing-card {
-    border: 2px solid var(--bg-lite);
+/* common borders */
+.playing-card,
+.card-tray {
+    border: 1px solid var(--bg-lite);
     border-radius: 1em;
-    overflow: hidden;
+
+    display: inline-block;
     position: relative;
     
     width: 106.34px;
     height: 150px;
+}
+
+/* ****************** */
+
+.playing-card {
+    overflow: hidden;
+    position: absolute;
 
     & > img {
         position: absolute;
@@ -18,4 +28,8 @@
     &.reversed .front {
         display: none;
     }
+}
+
+#playmat .table {
+    height: 50vh !important;
 }

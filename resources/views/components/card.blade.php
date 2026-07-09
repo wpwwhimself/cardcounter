@@ -17,7 +17,7 @@ $card_path = "https://raw.githubusercontent.com/wpwwhimself/tarot-deck/master/ko
 $card_path .= "c$colors[$color]/c$colors[$color]-$rank.jpg";
 @endphp
 
-<div class="playing-card">
+<div class="playing-card reversed" data-value="{{ $id }}" draggable="true" ondragstart="grabCard(event);">
     <img src="{{ asset('media/rewers.jpg') }}" alt="back" class="back">
-    <img src="{{ $card_path }}" alt="front" class="front">
+    <img src="{{ asset($card_path) }}" alt="front" class="front">
 </div>
