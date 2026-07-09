@@ -9,7 +9,7 @@
 
     <div class="grid but-mobile-down" style="--col-count: 2;">
         <x-shipyard.app.card class="holder"
-            inner-class="flex right center middle no-wrap"
+            inner-class="flex right center middle nowrap"
         >
             @for ($i = 1; $i <= 4; $i++)
             <div class="card-tray" data-index="{{ $i }}" ondrop="dropCardToHolder(event);" ondragover="event.preventDefault();"></div>
@@ -17,7 +17,7 @@
         </x-shipyard.app.card>
 
         <x-shipyard.app.card class="final-holder"
-            inner-class="flex right center middle no-wrap"
+            inner-class="flex right center middle nowrap"
         >
             @for ($i = 1; $i <= 4; $i++)
             <div class="card-tray" data-index="{{ $i }}" ondrop="dropCardToFinalHolder(event);" ondragover="event.preventDefault();"></div>
@@ -26,7 +26,7 @@
     </div>
 
     <x-shipyard.app.card class="table"
-        inner-class="flex right center middle no-wrap"
+        inner-class="flex right center middle nowrap"
     >
         @for ($i = 1; $i <= 8; $i++)
         <div class="card-tray" data-index="{{ $i }}" ondrop="dropCardToTable(event);" ondragover="event.preventDefault();"></div>
@@ -62,7 +62,7 @@ function cardsCanBeStackedOnFinalHolder(upper_card, lower_card) {
     const lower_data = getCardValue(lower_card);
 
     if (!lower_card || !upper_card) return true;
-    
+
     return upper_data.color == lower_data.color
         && upper_data.rank == lower_data.rank + 1;
 }
