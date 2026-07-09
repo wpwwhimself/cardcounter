@@ -46,6 +46,37 @@ function init() {
     });
 }
 
+//? 🦺 validators 🦺 ?//
+function cardsCanBeStackedOnTable(upper_card, lower_card) {
+    const upper_data = getCardValue(upper_card);
+    const lower_data = getCardValue(lower_card);
+
+    if (!lower_card || !upper_card) return true;
+
+    return upper_data.color % 2 != lower_data.color % 2
+        && upper_data.rank == lower_data.rank - 1;
+}
+
+function cardsCanBeStackedOnFinalHolder(upper_card, lower_card) {
+    const upper_data = getCardValue(upper_card);
+    const lower_data = getCardValue(lower_card);
+
+    if (!lower_card || !upper_card) return true;
+    
+    return upper_data.color == lower_data.color
+        && upper_data.rank == lower_data.rank + 1;
+}
+
+function tooManyCardsInStack(cards) {
+    const cards_to_move = cards.length;
+    const free_holders = Array.from(document.querySelectorAll(`#playmat .holder .card-tray`))
+        .filter(tray => tray.children.length == 0)
+        .length;
+
+    return cards_to_move > free_holders;
+}
+//? 🦺 validators 🦺 ?//
+
 //? 🥪 stacks 🥪 ?//
 function dropCardToTable(ev) {
     ev.preventDefault();
@@ -67,15 +98,52 @@ function moveCardStackToTable(card, tray) {
     let cards_to_move = [];
     let card_cursor = card;
     while (card_cursor) {
+        if (!cardsCanBeStackedOnTable(card_cursor.nextSibling, card_cursor)) {
+            popToast("error", "Nie możesz przenieść tej karty z tego poziomu.");
+            return;
+        }
         cards_to_move.push(card_cursor);
         card_cursor = card_cursor.nextSibling;
     }
+
+    if (!cardsCanBeStackedOnTable(card, getTopCardFromStack(tray))) {
+        popToast("error", "Nie możesz przenieść tutaj tej karty.");
+        return;
+    }
+
+    if (tooManyCardsInStack(cards_to_move)) {
+        popToast("error", "Próbujesz przenieść zbyt wiele kart.");
+        return;
+    }
+
     cards_to_move.forEach(c => {
         moveCardToTable(c, tray);
     });
 }
 //? 🥪 stacks 🥪 ?//
 
+//? ⚓ holders ⚓ ?//
+function dropCardToHolder(ev) {
+    ev.preventDefault();
+    const card = document.querySelector(`#playmat .playing-card[data-value="${ev.dataTransfer.getData("card")}"]`);
+    const tray = ev.target.closest(".card-tray");
+
+    moveCardToHolder(card, tray);
+}
+
+function moveCardToHolder(card, holder) {
+    const original_tray = card.closest(".card-tray");
+
+    if (holder.children.length > 0) {
+        popToast("error", "Pole jest zajęte.");
+        return;
+    }
+
+    holder.appendChild(card);
+    spreadStack(holder);
+    spreadStack(original_tray);
+}
+//? ⚓ holders ⚓ ?//
 </script>
 @endsection
 
