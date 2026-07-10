@@ -9,4 +9,9 @@ Route::controller(GameController::class)->group(function () {
     Route::view("freecell", "pages.games.freecell")->name("games.freecell");
 
     Route::view("", "pages.index")->name("home");
+
+    Route::prefix("api/game-stats")->group(function () {
+        Route::post("start", "gameStatStart");
+        Route::post("finish", "gameStatFinish");
+    });
 });

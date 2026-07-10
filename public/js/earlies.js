@@ -1,3 +1,15 @@
+function reuseModal() {
+    const modal = document.getElementById("modal");
+
+    return {
+        modal: modal,
+        loader: modal.querySelector(".loader"),
+        card: modal.querySelector("#modal-card"),
+        header: modal.querySelector("#modal-card .header .titles [role='texts'] h2"),
+        contents: modal.querySelector("#modal-card .contents"),
+    };
+}
+
 // #region card selectors
 function getAllCards() {
     return document.querySelectorAll('#playmat .playing-card');

@@ -55,6 +55,25 @@
 @section("prepends")
 <script>
 function init() {
+    const modal = reuseModal();
+    
+    modal.modal.classList.remove("hidden");
+    modal.loader.classList.remove("hidden");
+    fetch(`/api/game-stats/start`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+        },
+        body: JSON.stringify({
+            game: "freecell",
+        }),
+    })
+        .then(res => res.json())
+        .finally(() => {
+            modal.modal.classList.add("hidden");
+            modal.loader.classList.add("hidden");
+
     // put cards on the table
     getAllCards().forEach((card, i) => {
         const tray = document.querySelector(`#playmat .table .card-tray[data-index="${i % 8 + 1}"]`);
@@ -62,6 +81,31 @@ function init() {
     });
 
     window.gameHistory = [];
+        });
+}
+
+function finish() {
+    const modal = reuseModal();
+
+    modal.modal.classList.remove("hidden");
+    modal.loader.classList.remove("hidden");
+    fetch(`/api/game-stats/finish`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+        },
+        body: JSON.stringify({
+            game: "freecell",
+        }),
+    })
+        .then(res => res.json())
+        .then(res => {
+            modal.loader.classList.add("hidden");
+            modal.card.classList.remove("hidden");
+            modal.header.textContent = "Gratulacje!";
+            modal.contents.innerHTML = res.modal;
+        });
 }
 
 function log(card, target) {
@@ -121,6 +165,14 @@ function moveCard(card, tray) {
     tray.appendChild(card);
     cleanUpStack(tray);
     cleanUpStack(original_tray);
+
+    // check win condition
+    const completed_final_holders =
+        Array.from(document.querySelectorAll(`#playmat .final-holder .card-tray`))
+            .reduce((completed, holder) => completed + (holder.children.length == 13), 0);
+    if (completed_final_holders == 4) {
+        finish();
+    }
 }
 
 function moveCardStackToTable(card, tray) {
@@ -145,6 +197,7 @@ function moveCardStackToTable(card, tray) {
         return;
     }
 
+    log(card, tray);
     cards_to_move.forEach(c => {
         moveCard(c, tray);
     });
@@ -238,7 +291,9 @@ function undo() {
 
 @section("appends")
 <script defer>
+document.addEventListener("DOMContentLoaded", () => {
 init();
+});
 
 getAllCards().forEach(card => {
     card.classList.toggle("reversed");
