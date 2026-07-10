@@ -74,13 +74,13 @@ function init() {
             modal.modal.classList.add("hidden");
             modal.loader.classList.add("hidden");
 
-    // put cards on the table
-    getAllCards().forEach((card, i) => {
-        const tray = document.querySelector(`#playmat .table .card-tray[data-index="${i % 8 + 1}"]`);
-        moveCard(card, tray);
-    });
+            // put cards on the table
+            getAllCards().forEach((card, i) => {
+                const tray = document.querySelector(`#playmat .table .card-tray[data-index="${i % 8 + 1}"]`);
+                moveCard(card, tray);
+            });
 
-    window.gameHistory = [];
+            window.gameHistory = [];
         });
 }
 
@@ -114,7 +114,6 @@ function log(card, target) {
         from: card.closest(".card-tray"),
         to: target,
     });
-    console.log(window.gameHistory);
 }
 
 //? 🦺 validators 🦺 ?//
@@ -155,8 +154,7 @@ function dropCardToTable(ev) {
     const card = document.querySelector(`#playmat .playing-card[data-value="${ev.dataTransfer.getData("card")}"]`);
     const tray = ev.target.closest(".card-tray");
 
-    log(card, tray);
-    moveCard(card, tray);
+    moveCardStackToTable(card, tray);
 }
 
 function moveCard(card, tray) {
@@ -283,7 +281,20 @@ function undo() {
 
     const action = window.gameHistory.pop();
     
-    moveCard(action.card, action.from);
+    let cards_to_move = [];
+    let card_cursor = action.card;
+    while (card_cursor) {
+        if (!cardsCanBeStackedOnTable(card_cursor.nextSibling, card_cursor)) {
+            popToast("error", "Nie możesz przenieść tej karty z tego poziomu.");
+            return;
+        }
+        cards_to_move.push(card_cursor);
+        card_cursor = card_cursor.nextSibling;
+    }
+
+    cards_to_move.forEach(c => {
+        moveCard(c, action.from);
+    });
 }
 //? 🛟 helpers 🛟 ?//
 </script>
@@ -292,7 +303,7 @@ function undo() {
 @section("appends")
 <script defer>
 document.addEventListener("DOMContentLoaded", () => {
-init();
+    init();
 });
 
 getAllCards().forEach(card => {
