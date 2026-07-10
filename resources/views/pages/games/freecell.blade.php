@@ -7,13 +7,29 @@
 <div id="playmat" class="flex down">
     <x-deck />
 
-    <div class="grid but-mobile-down" style="--col-count: 2;">
+    <div class="grid but-mobile-down" style="grid-template-columns: 1fr auto 1fr;">
         <x-shipyard.app.card class="holder"
             inner-class="flex right center middle nowrap"
         >
             @for ($i = 1; $i <= 4; $i++)
             <div class="card-tray compact" data-index="{{ $i }}" ondrop="dropCardToHolder(event);" ondragover="event.preventDefault();"></div>
             @endfor
+        </x-shipyard.app.card>
+
+        <x-shipyard.app.card class="buttons" inner-class="flex down but-mobile-right center middle no-gap">
+            <x-shipyard.ui.button
+                icon="restart"
+                pop="Od nowa"
+                :action="route('games.freecell')"
+                class="danger"
+            />
+            <x-shipyard.ui.button
+                icon="undo"
+                pop="Cofnij"
+                action="none"
+                onclick="undo();"
+                class="tertiary"
+            />
         </x-shipyard.app.card>
 
         <x-shipyard.app.card class="final-holder"
@@ -42,8 +58,19 @@ function init() {
     // put cards on the table
     getAllCards().forEach((card, i) => {
         const tray = document.querySelector(`#playmat .table .card-tray[data-index="${i % 8 + 1}"]`);
-        moveCardToTable(card, tray);
+        moveCard(card, tray);
     });
+
+    window.gameHistory = [];
+}
+
+function log(card, target) {
+    window.gameHistory.push({
+        card: card,
+        from: card.closest(".card-tray"),
+        to: target,
+    });
+    console.log(window.gameHistory);
 }
 
 //? 🦺 validators 🦺 ?//
@@ -84,10 +111,11 @@ function dropCardToTable(ev) {
     const card = document.querySelector(`#playmat .playing-card[data-value="${ev.dataTransfer.getData("card")}"]`);
     const tray = ev.target.closest(".card-tray");
 
-    moveCardStackToTable(card, tray);
+    log(card, tray);
+    moveCard(card, tray);
 }
 
-function moveCardToTable(card, tray) {
+function moveCard(card, tray) {
     const original_tray = card.closest(".card-tray");
 
     tray.appendChild(card);
@@ -118,7 +146,7 @@ function moveCardStackToTable(card, tray) {
     }
 
     cards_to_move.forEach(c => {
-        moveCardToTable(c, tray);
+        moveCard(c, tray);
     });
 }
 //? 🥪 stacks 🥪 ?//
@@ -139,15 +167,8 @@ function dropCardToHolder(ev) {
         return;
     }
 
-    moveCardToHolder(card, holder);
-}
-
-function moveCardToHolder(card, holder) {
-    const original_tray = card.closest(".card-tray");
-
-    holder.appendChild(card);
-    cleanUpStack(holder);
-    cleanUpStack(original_tray);
+    log(card, holder);
+    moveCard(card, holder);
 }
 
 function dropCardToFinalHolder(ev) {
@@ -165,15 +186,8 @@ function dropCardToFinalHolder(ev) {
         return;
     }
 
-    moveCardToFinalHolder(card, holder);
-}
-
-function moveCardToFinalHolder(card, holder) {
-    const original_tray = card.closest(".card-tray");
-
-    holder.appendChild(card);
-    cleanUpStack(holder);
-    cleanUpStack(original_tray);
+    log(card, holder);
+    moveCard(card, holder);
 }
 //? ⚓ holders ⚓ ?//
 
@@ -196,16 +210,27 @@ function collectOne() {
     Array.from(document.querySelectorAll(`#playmat .table .card-tray, #playmat .holder .card-tray`)).forEach(tray => {
         const top_card = getTopCardFromStack(tray);
         Array.from(document.querySelectorAll(`#playmat .final-holder .card-tray`)).forEach(holder => {
-            if (!cardsCanBeStackedOnFinalHolder(top_card, getTopCardFromStack(holder))) {
-                return;
-            }
+            if (!cardsCanBeStackedOnFinalHolder(top_card, getTopCardFromStack(holder))) return;
+            if (top_card.closest(".card").classList.contains("final-holder")) return;
 
-            moveCardToFinalHolder(top_card, holder);
+            log(top_card, holder);
+            moveCard(top_card, holder);
             collected = true;
         });
     });
 
     return collected;
+}
+
+function undo() {
+    if (window.gameHistory.length == 0) {
+        popToast("error", "To już początek.");
+        return;
+    }
+
+    const action = window.gameHistory.pop();
+    
+    moveCard(action.card, action.from);
 }
 //? 🛟 helpers 🛟 ?//
 </script>
