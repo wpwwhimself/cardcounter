@@ -61,7 +61,8 @@ function cardsCanBeStackedOnFinalHolder(upper_card, lower_card) {
     const upper_data = getCardValue(upper_card);
     const lower_data = getCardValue(lower_card);
 
-    if (!lower_card || !upper_card) return true;
+    if (!upper_card) return false;
+    if (!lower_card) return (upper_data.rank == 1);
 
     return upper_data.color == lower_data.color
         && upper_data.rank == lower_data.rank + 1;
@@ -126,18 +127,23 @@ function moveCardStackToTable(card, tray) {
 function dropCardToHolder(ev) {
     ev.preventDefault();
     const card = document.querySelector(`#playmat .playing-card[data-value="${ev.dataTransfer.getData("card")}"]`);
-    const tray = ev.target.closest(".card-tray");
-
-    moveCardToHolder(card, tray);
-}
-
-function moveCardToHolder(card, holder) {
-    const original_tray = card.closest(".card-tray");
+    const holder = ev.target.closest(".card-tray");
 
     if (holder.children.length > 0) {
         popToast("error", "Pole jest zajęte.");
         return;
     }
+
+    if (card.nextSibling) {
+        popToast("error", "Nie możesz przenieść tej karty z tego poziomu.");
+        return;
+    }
+
+    moveCardToHolder(card, holder);
+}
+
+function moveCardToHolder(card, holder) {
+    const original_tray = card.closest(".card-tray");
 
     holder.appendChild(card);
     cleanUpStack(holder);
@@ -147,24 +153,61 @@ function moveCardToHolder(card, holder) {
 function dropCardToFinalHolder(ev) {
     ev.preventDefault();
     const card = document.querySelector(`#playmat .playing-card[data-value="${ev.dataTransfer.getData("card")}"]`);
-    const tray = ev.target.closest(".card-tray");
-
-    moveCardToFinalHolder(card, tray);
-}
-
-function moveCardToFinalHolder(card, holder) {
-    const original_tray = card.closest(".card-tray");
+    const holder = ev.target.closest(".card-tray");
 
     if (!cardsCanBeStackedOnFinalHolder(card, getTopCardFromStack(holder))) {
         popToast("error", "Ta karta tu nie pasuje.");
         return;
     }
 
+    if (card.nextSibling) {
+        popToast("error", "Nie możesz przenieść tej karty z tego poziomu.");
+        return;
+    }
+
+    moveCardToFinalHolder(card, holder);
+}
+
+function moveCardToFinalHolder(card, holder) {
+    const original_tray = card.closest(".card-tray");
+
     holder.appendChild(card);
     cleanUpStack(holder);
     cleanUpStack(original_tray);
 }
 //? ⚓ holders ⚓ ?//
+
+//? 🛟 helpers 🛟 ?//
+function collectAll() {
+    let none_collected = true;
+
+    while(collectOne()) {
+        none_collected = false;
+    }
+
+    if (none_collected) {
+        popToast("info", "Nie ma kart do przeniesienia.");
+    }
+}
+
+function collectOne() {
+    let collected = false;
+
+    Array.from(document.querySelectorAll(`#playmat .table .card-tray, #playmat .holder .card-tray`)).forEach(tray => {
+        const top_card = getTopCardFromStack(tray);
+        Array.from(document.querySelectorAll(`#playmat .final-holder .card-tray`)).forEach(holder => {
+            if (!cardsCanBeStackedOnFinalHolder(top_card, getTopCardFromStack(holder))) {
+                return;
+            }
+
+            moveCardToFinalHolder(top_card, holder);
+            collected = true;
+        });
+    });
+
+    return collected;
+}
+//? 🛟 helpers 🛟 ?//
 </script>
 @endsection
 
@@ -174,6 +217,11 @@ init();
 
 getAllCards().forEach(card => {
     card.classList.toggle("reversed");
+});
+
+document.addEventListener("contextmenu", (ev) => {
+    ev.preventDefault();
+    collectAll();
 });
 </script>
 @endsection
