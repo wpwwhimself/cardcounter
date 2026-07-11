@@ -7,6 +7,7 @@ if (file_exists(__DIR__.'/Shipyard/shipyard.php')) require __DIR__.'/Shipyard/sh
 
 Route::controller(GameController::class)->group(function () {
     Route::view("freecell", "pages.games.freecell")->name("games.freecell");
+    Route::view("spider", "pages.games.spider")->name("games.spider");
 
     Route::view("", "pages.index")->name("home");
 

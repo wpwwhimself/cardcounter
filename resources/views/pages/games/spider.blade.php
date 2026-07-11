@@ -1,26 +1,28 @@
 @extends("layouts.shipyard.admin")
-@section("title", "FreeCell")
+@section("title", "Pasjans Pająk")
 @section("subtitle", "Gry")
 
 @section("content")
 
-<div id="playmat" class="flex down">
-    <x-deck />
+@php
+$color_count = request("colors", 1);
+@endphp
 
-    <div class="grid but-mobile-down" style="grid-template-columns: 1fr auto 1fr;">
-        <x-shipyard.app.card class="holder"
+<div id="playmat" class="flex down">
+    <x-deck :mode="'spider-' . $color_count" />
+
+    <div class="grid but-mobile-down" style="grid-template-columns: auto auto 1fr;">
+        <x-shipyard.app.card class="deck"
             inner-class="flex right center middle nowrap"
         >
-            @for ($i = 1; $i <= 4; $i++)
-            <div class="card-tray compact" data-index="{{ $i }}" ondrop="dropCardToHolder(event);" ondragover="event.preventDefault();"></div>
-            @endfor
+            <div class="card-tray compact" onclick="dropNewLine();"></div>
         </x-shipyard.app.card>
 
         <x-shipyard.app.card class="buttons" inner-class="flex down but-mobile-right center middle no-gap">
             <x-shipyard.ui.button
                 icon="restart"
                 pop="Od nowa"
-                :action="route('games.freecell')"
+                :action="route('games.spider')"
                 class="danger"
             />
             <x-shipyard.ui.button
@@ -35,8 +37,8 @@
         <x-shipyard.app.card class="final-holder"
             inner-class="flex right center middle nowrap"
         >
-            @for ($i = 1; $i <= 4; $i++)
-            <div class="card-tray compact" data-index="{{ $i }}" ondrop="dropCardToFinalHolder(event);" ondragover="event.preventDefault();"></div>
+            @for ($i = 1; $i <= 8; $i++)
+            <div class="card-tray compact" data-index="{{ $i }}"></div>
             @endfor
         </x-shipyard.app.card>
     </div>
@@ -44,7 +46,7 @@
     <x-shipyard.app.card class="table"
         inner-class="flex right center middle nowrap"
     >
-        @for ($i = 1; $i <= 8; $i++)
+        @for ($i = 1; $i <= 10; $i++)
         <div class="card-tray" data-index="{{ $i }}" ondrop="dropCardToTable(event);" ondragover="event.preventDefault();"></div>
         @endfor
     </x-shipyard.app.card>
@@ -66,7 +68,7 @@ function init() {
             "X-CSRF-TOKEN": "{{ csrf_token() }}",
         },
         body: JSON.stringify({
-            game: "freecell",
+            game: "spider",
         }),
     })
         .then(res => res.json())
@@ -74,10 +76,23 @@ function init() {
             modal.modal.classList.add("hidden");
             modal.loader.classList.add("hidden");
 
-            // put cards on the table
+            // put cards in the deck
+            const deck = document.querySelector(`#playmat .deck .card-tray`);
             getAllCards().forEach((card, i) => {
-                const tray = document.querySelector(`#playmat .table .card-tray[data-index="${i % 8 + 1}"]`);
+                moveCard(card, deck);
+            });
+
+            // initial population
+            getAllCards().forEach((card, i) => {
+                if (i >= 54) return;
+
+                const tray = document.querySelector(`#playmat .table .card-tray[data-index="${i % 10 + 1}"]`);
                 moveCard(card, tray);
+            });
+
+            // reveal top cards
+            document.querySelectorAll(`#playmat .table .card-tray`).forEach(tray => {
+                checkTopCardVisible(tray);
             });
 
             window.gameHistory = [];
@@ -96,7 +111,7 @@ function finish() {
             "X-CSRF-TOKEN": "{{ csrf_token() }}",
         },
         body: JSON.stringify({
-            game: "freecell",
+            game: "spider",
         }),
     })
         .then(res => res.json())
@@ -123,33 +138,7 @@ function cardsCanBeStackedOnTable(upper_card, lower_card) {
 
     if (!lower_card || !upper_card) return true;
 
-    return upper_data.color % 2 != lower_data.color % 2
-        && upper_data.rank == lower_data.rank - 1;
-}
-
-function cardsCanBeStackedOnFinalHolder(upper_card, lower_card) {
-    const upper_data = getCardValue(upper_card);
-    const lower_data = getCardValue(lower_card);
-
-    if (!upper_card) return false;
-    if (!lower_card) return (upper_data.rank == 1);
-
-    return upper_data.color == lower_data.color
-        && upper_data.rank == lower_data.rank + 1;
-}
-
-function tooManyCardsInStack(cards) {
-    const cards_to_move = cards.length;
-
-    const free_holders = Array.from(document.querySelectorAll(`#playmat .holder .card-tray`))
-        .filter(tray => tray.children.length == 0)
-        .length;
-    const free_trays = Array.from(document.querySelectorAll(`#playmat .table .card-tray`))
-        .filter(tray => tray.children.length == 0)
-        .length;
-    const max_stack_size = Math.pow(2, free_trays) * (free_holders + 1);
-
-    return cards_to_move > max_stack_size;
+    return upper_data.rank == lower_data.rank - 1;
 }
 //? 🦺 validators 🦺 ?//
 
@@ -158,8 +147,13 @@ function dropCardToTable(ev) {
     ev.preventDefault();
     const card = document.querySelector(`#${ev.dataTransfer.getData("card")}`);
     const tray = ev.target.closest(".card-tray");
+    const original_tray = card.closest(".card-tray");
+
+    if (card.closest(".playing-card").classList.contains("reversed")) return;
 
     moveCardStackToTable(card, tray);
+    checkTopCardVisible(original_tray);
+    tryCollectTray(tray);
 }
 
 function moveCard(card, tray) {
@@ -168,21 +162,15 @@ function moveCard(card, tray) {
     tray.appendChild(card);
     cleanUpStack(tray);
     cleanUpStack(original_tray);
-
-    // check win condition
-    const completed_final_holders =
-        Array.from(document.querySelectorAll(`#playmat .final-holder .card-tray`))
-            .reduce((completed, holder) => completed + (holder.children.length == 13), 0);
-    if (completed_final_holders == 4) {
-        finish();
-    }
 }
 
 function moveCardStackToTable(card, tray) {
     let cards_to_move = [];
     let card_cursor = card;
     while (card_cursor) {
-        if (!cardsCanBeStackedOnTable(card_cursor.nextSibling, card_cursor)) {
+        if (!cardsCanBeStackedOnTable(card_cursor.nextSibling, card_cursor)
+            || (card_cursor.nextSibling && getCardValue(card_cursor).color != getCardValue(card_cursor.nextSibling)?.color)
+        ) {
             popToast("error", "Nie możesz przenieść tej karty z tego poziomu.");
             return;
         }
@@ -195,11 +183,6 @@ function moveCardStackToTable(card, tray) {
         return;
     }
 
-    if (tooManyCardsInStack(cards_to_move)) {
-        popToast("error", "Próbujesz przenieść zbyt wiele kart.");
-        return;
-    }
-
     log(card, tray);
     cards_to_move.forEach(c => {
         moveCard(c, tray);
@@ -207,77 +190,59 @@ function moveCardStackToTable(card, tray) {
 }
 //? 🥪 stacks 🥪 ?//
 
-//? ⚓ holders ⚓ ?//
-function dropCardToHolder(ev) {
-    ev.preventDefault();
-    const card = document.querySelector(`#${ev.dataTransfer.getData("card")}`);
-    const holder = ev.target.closest(".card-tray");
+//? 🏃 basic actions 🏃 ?//
+function dropNewLine() {
+    const deck = document.querySelector(`#playmat .deck .card-tray`);
+    if (deck.children.length == 0) return;
 
-    if (holder.children.length > 0) {
-        popToast("error", "Pole jest zajęte.");
-        return;
-    }
-
-    if (card.nextSibling) {
-        popToast("error", "Nie możesz przenieść tej karty z tego poziomu.");
-        return;
-    }
-
-    log(card, holder);
-    moveCard(card, holder);
+    document.querySelectorAll(`#playmat .table .card-tray`).forEach(tray => {
+        moveCard(getTopCardFromStack(deck), tray);
+        checkTopCardVisible(tray);
+        tryCollectTray(tray);
+    })
 }
 
-function dropCardToFinalHolder(ev) {
-    ev.preventDefault();
-    const card = document.querySelector(`#${ev.dataTransfer.getData("card")}`);
-    const holder = ev.target.closest(".card-tray");
-
-    if (!cardsCanBeStackedOnFinalHolder(card, getTopCardFromStack(holder))) {
-        popToast("error", "Ta karta tu nie pasuje.");
-        return;
-    }
-
-    if (card.nextSibling) {
-        popToast("error", "Nie możesz przenieść tej karty z tego poziomu.");
-        return;
-    }
-
-    log(card, holder);
-    moveCard(card, holder);
-}
-//? ⚓ holders ⚓ ?//
-
-//? 🛟 helpers 🛟 ?//
-function collectAll() {
-    let none_collected = true;
-
-    while(collectOne()) {
-        none_collected = false;
-    }
-
-    if (none_collected) {
-        popToast("info", "Nie ma kart do przeniesienia.");
-    }
+function checkTopCardVisible(tray) {
+    const card = getTopCardFromStack(tray);
+    card?.classList.remove("reversed");
 }
 
-function collectOne() {
-    let collected = false;
+function tryCollectTray(tray) {
+    const top_card = getTopCardFromStack(tray);
+    if (getCardValue(top_card).rank != 1) return;
 
-    Array.from(document.querySelectorAll(`#playmat .table .card-tray, #playmat .holder .card-tray`)).forEach(tray => {
-        const top_card = getTopCardFromStack(tray);
-        Array.from(document.querySelectorAll(`#playmat .final-holder .card-tray`)).forEach(holder => {
-            if (!cardsCanBeStackedOnFinalHolder(top_card, getTopCardFromStack(holder))) return;
-            if (top_card.closest(".card").classList.contains("final-holder")) return;
+    let cards_to_move = [];
+    let card_cursor = top_card;
+    while (card_cursor) {
+        cards_to_move.push(card_cursor);
+        if (getCardValue(card_cursor).color != getCardValue(card_cursor.previousSibling)?.color
+            || (getCardValue(card_cursor).rank + 1) != getCardValue(card_cursor.previousSibling)?.rank
+        ) break;
+        card_cursor = card_cursor.previousSibling;
+    }
 
-            log(top_card, holder);
-            moveCard(top_card, holder);
-            collected = true;
-        });
+    if (cards_to_move.length < 13) return;
+
+    const first_free_holder = Array.from(document.querySelectorAll(`#playmat .final-holder .card-tray`)).find(holder => holder.children.length == 0);
+    cards_to_move.forEach(c => {
+        moveCard(c, first_free_holder);
     });
 
-    return collected;
+    checkTopCardVisible(tray);
+    checkWinCondition();
 }
 
+function checkWinCondition() {
+    const completed_final_holders =
+        Array.from(document.querySelectorAll(`#playmat .final-holder .card-tray`))
+            .reduce((completed, holder) => completed + (holder.children.length == 13), 0);
+    if (completed_final_holders == 8) {
+        finish();
+    }
+}
+//? 🏃 basic actions 🏃 ?//
+
+//? 🛟 helpers 🛟 ?//
 function undo() {
     if (window.gameHistory.length == 0) {
         popToast("error", "To już początek.");
@@ -311,13 +276,8 @@ document.addEventListener("DOMContentLoaded", () => {
     init();
 });
 
-getAllCards().forEach(card => {
-    card.classList.toggle("reversed");
-});
-
 document.addEventListener("contextmenu", (ev) => {
     ev.preventDefault();
-    collectAll();
 });
 </script>
 @endsection

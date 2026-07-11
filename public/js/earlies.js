@@ -36,7 +36,7 @@ function getCardValue(card, mode = "standard") {
 // #region dragging
 function grabCard(ev) {
     const card = ev.target.closest(".playing-card");
-    ev.dataTransfer.setData("card", card.dataset.value);
+    ev.dataTransfer.setData("card", card.id);
 }
 // #endregion
 

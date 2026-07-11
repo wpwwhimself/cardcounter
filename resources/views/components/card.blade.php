@@ -1,11 +1,12 @@
 @props([
     "id",
+    "value",
     "mono" => false,
 ])
 
 @php
-$rank = Str::after($id, '-');
-$color = Str::before($id, '-');
+$rank = Str::after($value, '-');
+$color = Str::before($value, '-');
 $colors = [
     "A" => "miecze",
     "B" => "kielichy",
@@ -23,7 +24,7 @@ $card_path = "https://raw.githubusercontent.com/wpwwhimself/tarot-deck/master/ko
 $card_path .= "c$color_name/c$color_name-$rank.jpg";
 @endphp
 
-<div class="playing-card interactive reversed" data-value="{{ $id }}" draggable="true" ondragstart="grabCard(event);">
+<div class="playing-card interactive reversed" id="pc-{{ $id }}" data-value="{{ $value }}" draggable="true" ondragstart="grabCard(event);">
     <img src="{{ asset('media/rewers.jpg') }}" alt="back" class="back">
     <img src="{{ asset($card_path) }}" alt="front" class="front">
 </div>
