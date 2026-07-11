@@ -56,7 +56,7 @@
 <script>
 function init() {
     const modal = reuseModal();
-    
+
     modal.modal.classList.remove("hidden");
     modal.loader.classList.remove("hidden");
     fetch(`/api/game-stats/start`, {
@@ -140,11 +140,16 @@ function cardsCanBeStackedOnFinalHolder(upper_card, lower_card) {
 
 function tooManyCardsInStack(cards) {
     const cards_to_move = cards.length;
+
     const free_holders = Array.from(document.querySelectorAll(`#playmat .holder .card-tray`))
         .filter(tray => tray.children.length == 0)
         .length;
+    const free_trays = Array.from(document.querySelectorAll(`#playmat .table .card-tray`))
+        .filter(tray => tray.children.length == 0)
+        .length;
+    const max_stack_size = Math.pow(2, free_trays) * (free_holders + 1);
 
-    return cards_to_move > free_holders + 1;
+    return cards_to_move > max_stack_size;
 }
 //? 🦺 validators 🦺 ?//
 
@@ -280,7 +285,7 @@ function undo() {
     }
 
     const action = window.gameHistory.pop();
-    
+
     let cards_to_move = [];
     let card_cursor = action.card;
     while (card_cursor) {
