@@ -24,7 +24,7 @@ $color_count = request("colors", 1);
             <x-shipyard.ui.button
                 icon="restart"
                 pop="Od nowa"
-                :action="route('games.spider')"
+                :action="route('games.spider', $color_count ? ['colors' => $color_count] : [])"
                 class="danger"
             />
             <x-shipyard.ui.button

@@ -18,7 +18,8 @@
     <x-shipyard.ui.button
         icon="restart"
         label="Zagraj ponownie"
-        :action="route('games.' . $game)"
+        action="none"
+        onclick="window.location.reload();"
         class="primary"
     />
     <x-shipyard.ui.button
