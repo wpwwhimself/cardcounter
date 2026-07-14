@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Shipyard\User as ShipyardUser;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends ShipyardUser
 {
@@ -26,4 +27,15 @@ class User extends ShipyardUser
         ];
     }
     #endregion
+
+    public function profileComponents(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => [
+                view("components.game-stats.user-stats", [
+                    "user" => $this,
+                ])->render(),
+            ],
+        );
+    }
 }

@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Auth;
 
 class GameController extends Controller
 {
+    public const GAME_META = [
+        "freecell" => [ "name" => "FreeCell", "icon" => "crop-free" ],
+        "spider" => [ "name" => "Pasjans Pająk", "icon" => "spider" ],
+    ];
+
     #region game stats
     private function updateGameStats($user, $game, $mode, $value = null)
     {
@@ -24,7 +29,7 @@ class GameController extends Controller
                     $stats[$game][$mode] = $value;
                 }
                 break;
-            
+
             default:
                 $stats[$game][$mode]++;
         }

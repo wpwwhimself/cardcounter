@@ -4,8 +4,11 @@
 @section("content")
 
 <div class="grid but-mobile-down" style="--col-count: 3;">
-    <x-shipyard.app.card title="FreeCell"
-        icon="crop-free"
+    @php
+    $meta = \App\Http\Controllers\GameController::GAME_META["freecell"];
+    @endphp
+    <x-shipyard.app.card :title="$meta['name']"
+        :icon="$meta['icon']"
         inner-class="flex right spread and-cover"
     >
         <x-shipyard.ui.button
@@ -16,8 +19,11 @@
         />
     </x-shipyard.app.card>
 
-    <x-shipyard.app.card title="Pasjans Pająk"
-        icon="spider"
+    @php
+    $meta = \App\Http\Controllers\GameController::GAME_META["spider"];
+    @endphp
+    <x-shipyard.app.card :title="$meta['name']"
+        :icon="$meta['icon']"
         inner-class="flex right spread and-cover"
     >
         @foreach ([
