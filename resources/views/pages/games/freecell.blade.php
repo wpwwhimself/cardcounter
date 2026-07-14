@@ -57,10 +57,7 @@
 @section("prepends")
 <script>
 function init() {
-    const modal = reuseModal();
-
-    modal.modal.classList.remove("hidden");
-    modal.loader.classList.remove("hidden");
+    toggleBigLoader();
     fetch(`/api/game-stats/start`, {
         method: "POST",
         headers: {
@@ -73,8 +70,7 @@ function init() {
     })
         .then(res => res.json())
         .finally(() => {
-            modal.modal.classList.add("hidden");
-            modal.loader.classList.add("hidden");
+            toggleBigLoader();
 
             // put cards on the table
             getAllCards().forEach((card, i) => {
@@ -85,41 +81,6 @@ function init() {
             window.gameHistory = [];
             startTimer();
         });
-}
-
-function finish() {
-    const time_elapsed = stopTimer();
-
-    const modal = reuseModal();
-
-    modal.modal.classList.remove("hidden");
-    modal.loader.classList.remove("hidden");
-    fetch(`/api/game-stats/finish`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": "{{ csrf_token() }}",
-        },
-        body: JSON.stringify({
-            game: "freecell",
-            time: time_elapsed,
-        }),
-    })
-        .then(res => res.json())
-        .then(res => {
-            modal.loader.classList.add("hidden");
-            modal.card.classList.remove("hidden");
-            modal.header.textContent = "Gratulacje!";
-            modal.contents.innerHTML = res.modal;
-        });
-}
-
-function log(card, target) {
-    window.gameHistory.push({
-        card: card,
-        from: card.closest(".card-tray"),
-        to: target,
-    });
 }
 
 //? 🦺 validators 🦺 ?//
@@ -181,7 +142,7 @@ function moveCard(card, tray) {
         Array.from(document.querySelectorAll(`#playmat .final-holder .card-tray`))
             .reduce((completed, holder) => completed + (holder.children.length == 13), 0);
     if (completed_final_holders == 4) {
-        finish();
+        finish("freecell");
     }
 }
 

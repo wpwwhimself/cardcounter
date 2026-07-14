@@ -1,13 +1,30 @@
-function reuseModal() {
-    const modal = document.getElementById("modal");
+function finish(game) {
+    const time_elapsed = stopTimer();
 
-    return {
-        modal: modal,
-        loader: modal.querySelector(".loader"),
-        card: modal.querySelector("#modal-card"),
-        header: modal.querySelector("#modal-card .header .titles [role='texts'] h2"),
-        contents: modal.querySelector("#modal-card .contents"),
-    };
+    toggleBigLoader();
+    fetch(`/api/game-stats/finish`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRF-TOKEN": "{{ csrf_token() }}",
+        },
+        body: JSON.stringify({
+            game: game,
+            time: time_elapsed,
+        }),
+    })
+        .then(res => res.json())
+        .then(res => {
+            openModalManuall("Gratulacje!", res.modal);
+        });
+}
+
+function log(card, target) {
+    window.gameHistory.push({
+        card: card,
+        from: card.closest(".card-tray"),
+        to: target,
+    });
 }
 
 // #region card selectors
