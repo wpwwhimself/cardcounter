@@ -138,7 +138,7 @@ function cardsCanBeStackedOnFinalHolder(upper_card, lower_card) {
         && upper_data.rank == lower_data.rank + 1;
 }
 
-function tooManyCardsInStack(cards) {
+function tooManyCardsInStack(cards, target_tray) {
     const cards_to_move = cards.length;
 
     const free_holders = Array.from(document.querySelectorAll(`#playmat .holder .card-tray`))
@@ -146,7 +146,8 @@ function tooManyCardsInStack(cards) {
         .length;
     const free_trays = Array.from(document.querySelectorAll(`#playmat .table .card-tray`))
         .filter(tray => tray.children.length == 0)
-        .length;
+        .length
+        - (target_tray.children.length === 0); // exclude one tray if it is the target
     const max_stack_size = Math.pow(2, free_trays) * (free_holders + 1);
 
     return cards_to_move > max_stack_size;
@@ -195,7 +196,7 @@ function moveCardStackToTable(card, tray) {
         return;
     }
 
-    if (tooManyCardsInStack(cards_to_move)) {
+    if (tooManyCardsInStack(cards_to_move, tray)) {
         popToast("error", "Próbujesz przenieść zbyt wiele kart.");
         return;
     }
