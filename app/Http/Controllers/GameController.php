@@ -9,14 +9,25 @@ use Illuminate\Support\Facades\Auth;
 class GameController extends Controller
 {
     #region game stats
-    private function updateGameStats($user, $game, $mode)
+    private function updateGameStats($user, $game, $mode, $value = null)
     {
         $stats = $user->game_stats ?? [];
         $stats[$game] ??= [
             "started" => 0,
             "finished" => 0,
+            "top_time" => null,
         ];
-        $stats[$game][$mode]++;
+
+        switch ($mode) {
+            case "top_time":
+                if (($stats[$game][$mode] ?? "9:59:59") > $value) {
+                    $stats[$game][$mode] = $value;
+                }
+                break;
+            
+            default:
+                $stats[$game][$mode]++;
+        }
 
         $user->update(["game_stats" => $stats]);
     }
@@ -42,6 +53,7 @@ class GameController extends Controller
     {
         if (!Auth::guest()) {
             $this->updateGameStats(Auth::user(), $rq->game, "finished");
+            $this->updateGameStats(Auth::user(), $rq->game, "top_time", $rq->time);
         }
 
         $res = [

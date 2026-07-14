@@ -11,6 +11,7 @@
     <ul>
         <li>Rozpoczęte partie: {{ $user->game_stats[$game]["started"] }}</li>
         <li>Ukończone partie: {{ $user->game_stats[$game]["finished"] }}</li>
+        <li>Najlepszy czas: {{ $user->game_stats[$game]["top_time"] }}</li>
     </ul>
     @endif
 

@@ -19,6 +19,8 @@ $color_count = request("colors", 1);
         </x-shipyard.app.card>
 
         <x-shipyard.app.card class="buttons" inner-class="flex down but-mobile-right center middle no-gap">
+            <x-game-stats.timer />
+
             <x-shipyard.ui.button
                 icon="restart"
                 pop="Od nowa"
@@ -96,10 +98,13 @@ function init() {
             });
 
             window.gameHistory = [];
+            startTimer();
         });
 }
 
 function finish() {
+    const time_elapsed = stopTimer();
+
     const modal = reuseModal();
 
     modal.modal.classList.remove("hidden");
@@ -112,6 +117,7 @@ function finish() {
         },
         body: JSON.stringify({
             game: "spider",
+            time: time_elapsed,
         }),
     })
         .then(res => res.json())
