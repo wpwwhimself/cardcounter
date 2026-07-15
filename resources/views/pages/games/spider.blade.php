@@ -60,11 +60,10 @@ $color_count = request("colors", 1);
 <script>
 function init() {
     toggleBigLoader();
-    fetch(`/api/game-stats/start`, {
+    fetchWithXSRF(`/api/game-stats/start`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRF-TOKEN": "{{ csrf_token() }}",
         },
         body: JSON.stringify({
             game: "spider",

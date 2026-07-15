@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GameController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,3 +16,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 if (file_exists(__DIR__.'/Shipyard/shipyard_api.php')) require __DIR__.'/Shipyard/shipyard_api.php';
+
+Route::controller(GameController::class)->group(function () {
+    Route::prefix("game-stats")->group(function () {
+        Route::post("start", "gameStatStart");
+        Route::post("finish", "gameStatFinish");
+    });
+});

@@ -2,11 +2,10 @@ function finish(game) {
     const time_elapsed = stopTimer();
 
     toggleBigLoader();
-    fetch(`/api/game-stats/finish`, {
+    fetchWithXSRF(`/api/game-stats/finish`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRF-TOKEN": "{{ csrf_token() }}",
         },
         body: JSON.stringify({
             game: game,
@@ -15,7 +14,7 @@ function finish(game) {
     })
         .then(res => res.json())
         .then(res => {
-            openModalManuall("Gratulacje!", res.modal);
+            openModalManually("Gratulacje!", res.modal);
         });
 }
 
