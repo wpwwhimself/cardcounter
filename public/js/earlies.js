@@ -2,7 +2,7 @@ function finish(game) {
     const time_elapsed = stopTimer();
 
     toggleBigLoader();
-    fetchWithXSRF(`/api/game-stats/finish`, {
+    fetchWithUser(`/api/game-stats/finish`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

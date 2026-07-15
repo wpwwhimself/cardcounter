@@ -58,7 +58,7 @@
 <script>
 function init() {
     toggleBigLoader();
-    fetchWithXSRF(`/api/game-stats/start`, {
+    fetchWithUser(`/api/game-stats/start`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
