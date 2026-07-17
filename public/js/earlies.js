@@ -1,4 +1,6 @@
 function finish(game) {
+    if (!game) throw new Error("Game not specified.");
+
     const time_elapsed = stopTimer();
 
     toggleBigLoader();
