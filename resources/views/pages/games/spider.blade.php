@@ -12,46 +12,46 @@ $color_count = request("colors", 1);
     <x-deck :mode="'spider-' . $color_count" />
 
     <div class="grid but-mobile-down" style="grid-template-columns: auto auto 1fr;">
-        <x-shipyard.app.card class="deck"
+        <x-shipyard::app.card class="deck"
             inner-class="flex right center middle nowrap"
         >
             <div class="card-tray compact" onclick="dropNewLine();"></div>
-        </x-shipyard.app.card>
+        </x-shipyard::app.card>
 
-        <x-shipyard.app.card class="buttons" inner-class="flex down but-mobile-right center middle no-gap">
+        <x-shipyard::app.card class="buttons" inner-class="flex down but-mobile-right center middle no-gap">
             <x-game-stats.timer />
 
-            <x-shipyard.ui.button
+            <x-shipyard::ui.button
                 icon="restart"
                 pop="Od nowa"
                 :action="route('games.spider', $color_count ? ['colors' => $color_count] : [])"
                 class="danger"
             />
-            <x-shipyard.ui.button
+            <x-shipyard::ui.button
                 icon="undo"
                 pop="Cofnij"
                 action="none"
                 onclick="undo();"
                 class="tertiary"
             />
-        </x-shipyard.app.card>
+        </x-shipyard::app.card>
 
-        <x-shipyard.app.card class="final-holder"
+        <x-shipyard::app.card class="final-holder"
             inner-class="flex right center middle nowrap"
         >
             @for ($i = 1; $i <= 8; $i++)
             <div class="card-tray compact" data-index="{{ $i }}"></div>
             @endfor
-        </x-shipyard.app.card>
+        </x-shipyard::app.card>
     </div>
 
-    <x-shipyard.app.card class="table"
+    <x-shipyard::app.card class="table"
         inner-class="flex right center middle nowrap"
     >
         @for ($i = 1; $i <= 10; $i++)
         <div class="card-tray" data-index="{{ $i }}" ondrop="dropCardToTable(event);" ondragover="event.preventDefault();"></div>
         @endfor
-    </x-shipyard.app.card>
+    </x-shipyard::app.card>
 </div>
 
 @endsection

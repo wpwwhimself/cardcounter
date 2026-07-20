@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Shipyard\User as ShipyardUser;
+use Wpwwhimself\Shipyard\Models\User as ShipyardUser;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends ShipyardUser

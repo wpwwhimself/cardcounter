@@ -20,14 +20,14 @@ $meta = \App\Http\Controllers\GameController::GAME_META[$game];
     @endif
 
     <div class="flex right spread and-cover">
-        <x-shipyard.ui.button
+        <x-shipyard::ui.button
             icon="restart"
             label="Zagraj ponownie"
             action="none"
             onclick="window.location.reload();"
             class="primary"
         />
-        <x-shipyard.ui.button
+        <x-shipyard::ui.button
             icon="arrow-left"
             label="Wróć"
             :action="route('home')"

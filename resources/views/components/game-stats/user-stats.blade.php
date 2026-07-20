@@ -2,16 +2,17 @@
     "user",
 ])
 
-<x-shipyard.app.section title="Statystyki gier"
+<x-shipyard::app.section title="Statystyki gier"
     icon="abacus"
     inner-class="grid but-mobile-down"
     inner-style="--col-count: 3;"
 >
     @foreach ($user->game_stats as $game => $stats)
+    @continue (empty($game))
     @php
     $meta = \App\Http\Controllers\GameController::GAME_META[$game];
     @endphp
-    <x-shipyard.app.card :title="$meta['name']"
+    <x-shipyard::app.card :title="$meta['name']"
         :icon="$meta['icon']"
     >
         <table>
@@ -30,6 +31,6 @@
                 </tr>
             </tbody>
         </table>
-    </x-shipyard.app.card>
+    </x-shipyard::app.card>
     @endforeach
-</x-shipyard.app.section>
+</x-shipyard::app.section>
