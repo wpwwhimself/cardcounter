@@ -10,7 +10,12 @@ $meta = \App\Http\Controllers\GameController::GAME_META[$game];
 
 <div class="flex down">
     <p>Wygrałeś grę <strong class="accent primary">{{ $meta["name"] }}</strong>.</p>
-    <p>Twój czas: {{ $time }}</p>
+    <p>
+        Twój czas: {{ $time }}
+        @if ($user?->game_stats[$game]["top_time"] === $time)
+        – <strong class="accent primary">nowy rekord!</strong>
+        @endif
+    </p>
     
     @if ($user)
     <p>Twoje statystyki:</p>
