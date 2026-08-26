@@ -1,6 +1,7 @@
 @props([
     "user",
     "game",
+    "time",
 ])
 
 @php
@@ -9,6 +10,7 @@ $meta = \App\Http\Controllers\GameController::GAME_META[$game];
 
 <div class="flex down">
     <p>Wygrałeś grę <strong class="accent primary">{{ $meta["name"] }}</strong>.</p>
+    <p>Twój czas: {{ $time }}</p>
     
     @if ($user)
     <p>Twoje statystyki:</p>

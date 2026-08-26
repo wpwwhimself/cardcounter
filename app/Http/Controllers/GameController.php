@@ -67,6 +67,7 @@ class GameController extends Controller
             "modal" => view("components.game-stats.game-finished", [
                 "user" => Auth::user(),
                 "game" => $rq->game,
+                "time" => $rq->time,
             ])->render(),
         ];
 
