@@ -9,13 +9,12 @@ class User extends ShipyardUser
 {
     public const FROM_SHIPYARD = true;
 
-    protected $fillable = [
-        "name",
-        "email",
-        "password",
-        "roles",
-        "game_stats",
-    ];
+    public function __construct()
+    {
+        $this->mergeFillable([
+            "game_stats",
+        ]);
+    }
 
     #region attributes
     protected function casts(): array
