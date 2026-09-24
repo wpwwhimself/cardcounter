@@ -65,7 +65,7 @@ function cleanUpStack(stack) {
     Array.from(stack.children).forEach((card, i) => {
         card.style.transform = (stack.classList.contains("compact"))
             ? null
-            : `translateY(${i * 35}px)`;
+            : `translateY(${i * 25}px)`;
     });
 }
 // #endregion
