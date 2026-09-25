@@ -14,18 +14,10 @@ class User extends ShipyardUser
         $this->mergeFillable([
             "game_stats",
         ]);
-    }
-
-    #region attributes
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+        $this->mergeCasts([
             "game_stats" => "array",
-        ];
+        ]);
     }
-    #endregion
 
     public function profileComponents(): Attribute
     {
